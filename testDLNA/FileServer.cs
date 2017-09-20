@@ -47,7 +47,7 @@ namespace testDLNA
       testFolder subdir = new testFolder(newMaster, FriendlyName);
       subdir.Server = this;
       newMaster.AddSubFolder(subdir);
-      string[] files = System.IO.Directory.GetFiles(@"D:\Images");
+      string[] files = System.IO.Directory.GetFiles(@"I:\Wallpapers\New_Year", "*.jpg");
       foreach(string file in files)
       {
         var t = GetFile(subdir, new System.IO.FileInfo(file));
@@ -101,7 +101,7 @@ namespace testDLNA
         return item;
       }
 
-      string ext = System.IO.Path.GetExtension(info.FullName).Replace(".", String.Empty);
+      string ext = System.IO.Path.GetExtension(info.FullName).Replace(".", String.Empty).ToUpper();
       var type = DlnaMaps.Ext2Dlna[ext];
       var mediaType = DlnaMaps.Ext2Media[ext];
       var rv = BaseFile.GetFile(aParent, info, type, mediaType);
