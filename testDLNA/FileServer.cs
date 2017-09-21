@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NMaier.SimpleDlna.Server;
+using System.Data.SQLite;
+using System.IO;
 
 namespace testDLNA
 {
@@ -12,7 +14,7 @@ namespace testDLNA
     private readonly Identifiers ids;
     private readonly DlnaMediaTypes types;
     private object parent;
-
+    private string Tag;
     public IHttpAuthorizationMethod Authorizer { get; set; }
 
     public string FriendlyName { get; set; }
@@ -32,6 +34,7 @@ namespace testDLNA
       this.types = types;
       this.ids = ids;
       FriendlyName = Tag;
+      this.Tag = Tag;
       //UUID = DeriveUUID();
     }
     public void Load()
@@ -47,10 +50,10 @@ namespace testDLNA
       testFolder subdir = new testFolder(newMaster, FriendlyName);
       subdir.Server = this;
       newMaster.AddSubFolder(subdir);
-      string[] files = System.IO.Directory.GetFiles(@"I:\Wallpapers\New_Year", "*.jpg");
-      foreach(string file in files)
+      FileInfo[] files = GetFilesByTag(this.Tag);
+      foreach (FileInfo file in files)
       {
-        var t = GetFile(subdir, new System.IO.FileInfo(file));
+        var t = GetFile(subdir, file);
         subdir.AddResource(t);
       }
       RegisterNewMaster(newMaster);
@@ -111,6 +114,55 @@ namespace testDLNA
     internal Cover GetCover(BaseFile file)
     {
       return new Cover(new System.IO.FileInfo(file.Path));
+    }
+    private FileInfo[] GetFilesByTag(string Tag)
+    {
+      using (SQLiteConnection connection = new SQLiteConnection("data source=C:\\utils\\Erza\\erza.sqlite"))
+      {
+        connection.Open();
+        List<FileInfo> imgs = new List<FileInfo>();
+        string sql = "select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag = @tag AND images.is_deleted = 0;";
+        using (SQLiteCommand command = new SQLiteCommand(sql, connection))
+        {
+          command.Parameters.AddWithValue("tag", Tag);
+          SQLiteDataReader reader = command.ExecuteReader();
+          while (reader.Read())
+          {
+            object o = reader["file_path"];
+            if (o != DBNull.Value)
+            {
+              FileInfo fi = new FileInfo((string)o);
+              if (fi.Exists)
+              {
+                imgs.Add(fi);
+              }
+            }
+          }
+          reader.Close();
+          return imgs.ToArray();
+        }
+      }
+    }
+    private Stream GetPreview(string hash)
+    {
+      using (SQLiteConnection connect = new SQLiteConnection("data source=" + "C:\\utils\\erza\\Previews.sqlite"))
+      {
+        connect.Open();
+        using (SQLiteCommand command = new SQLiteCommand(connect))
+        {
+          command.CommandText = "SELECT preview FROM previews WHERE hash = @hash;";
+          command.Parameters.AddWithValue("hash", hash);
+          byte[] tmp = (byte[])command.ExecuteScalar();
+          if (tmp != null)
+          {
+              return new MemoryStream(tmp);
+          }
+          else
+          {
+            return null;
+          }
+        }
+      }
     }
   }
 }

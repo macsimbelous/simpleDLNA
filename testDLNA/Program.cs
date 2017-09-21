@@ -25,18 +25,21 @@ namespace testDLNA
     private static uint cancelHitCount;
     static void Main(string[] args)
     {
+      if (args.Length <= 0)
+      {
+        Console.WriteLine("Не заданы теги!");
+        return;
+      }
       Console.CancelKeyPress += CancelKeyPressed;
       SetupLogging();
       Console.Title = "SimpleDLNA - starting ...";
       var server = new HttpServer(9000);
       var authorizer = new HttpAuthorizer(server);
-      var friendlyName = "sdlna";
-      server.InfoFormat("Mounting FileServer for {0}", "test");
-      var fs = SetupFileServer(DlnaMediaTypes.Image, "test");
-      friendlyName = fs.FriendlyName;
+      server.InfoFormat("Mounting FileServer for {0}", args[0]);
+      var fs = SetupFileServer(DlnaMediaTypes.Image, args[0]);
       server.RegisterMediaServer(fs);
-      server.NoticeFormat("{0} mounted", "test");
-      Console.Title = $"{friendlyName} - running ...";
+      server.NoticeFormat("{0} mounted", args[0]);
+      Console.Title = $"{args[0]} - running ...";
       Run(server);
 
     }
@@ -66,7 +69,7 @@ namespace testDLNA
       }
       var fs = new FileServer(types, ids, Tag);
        
-          fs.FriendlyName = "sdlna";
+          fs.FriendlyName = "sdlna " + Tag;
       
         fs.Load();
       return fs;
