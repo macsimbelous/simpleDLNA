@@ -113,6 +113,13 @@ namespace testDLNA
     }
     internal Cover GetCover(BaseFile file)
     {
+      Stream prev = GetPreview(Path.GetFileNameWithoutExtension(file.Path));
+      if(prev != null)
+      {
+        Cover cover = new Cover(new System.IO.FileInfo(file.Path), prev);
+        prev.Close();
+        return cover;
+      }
       return new Cover(new System.IO.FileInfo(file.Path));
     }
     private FileInfo[] GetFilesByTag(string Tag)
