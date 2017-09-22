@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using File = TagLib.File;
 
-namespace testDLNA
+namespace Makina
 {
   internal sealed class TagLibFileAbstraction : File.IFileAbstraction
   {

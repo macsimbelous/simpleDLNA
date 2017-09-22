@@ -1,7 +1,7 @@
 using System.IO;
 using log4net;
 
-namespace testDLNA
+namespace Makina
 {
   internal sealed class FileReadStream : FileStream
   {

@@ -9,20 +9,21 @@ using NMaier.SimpleDlna.Server.Views;
 using NMaier.SimpleDlna.Utilities;
 using log4net;
 using System.Threading;
-using log4net;
 using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
 using log4net.Layout;
 using System.IO;
+using System.Data.SQLite;
 
-namespace testDLNA
+namespace Makina
 {
   class Program
   {
     private static readonly ManualResetEvent blockEvent =
       new ManualResetEvent(false);
     private static uint cancelHitCount;
+    private static SQLiteConnection previews_db;
     static void Main(string[] args)
     {
       if (args.Length <= 0)
@@ -68,10 +69,13 @@ namespace testDLNA
         }
       }
       var fs = new FileServer(types, ids, Tag);
-       
-          fs.FriendlyName = "sdlna " + Tag;
-      
-        fs.Load();
+
+      fs.FriendlyName = "sdlna " + Tag;
+      Program.previews_db = new SQLiteConnection("data source=" + "C:\\utils\\erza\\Previews.sqlite");
+      Program.previews_db.Open();
+      fs.PreviewsDB = Program.previews_db;
+      fs.ErzaConnectionString = "data source=C:\\utils\\Erza\\erza.sqlite";
+      fs.Load();
       return fs;
     }
     private static void CancelKeyPressed(object sender,
@@ -81,12 +85,14 @@ namespace testDLNA
       {
         LogManager.GetLogger(typeof(Program)).Fatal(
           "Emergency exit commencing");
+        Program.previews_db.Close();
         return;
       }
       e.Cancel = true;
       blockEvent.Set();
       LogManager.GetLogger(typeof(Program)).Info("Shutdown requested");
       Console.Title = "SimpleDLNA - shutting down ...";
+      Program.previews_db.Close();
     }
     public static void SetupLogging()
     {

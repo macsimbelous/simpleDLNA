@@ -6,7 +6,7 @@ using NMaier.SimpleDlna.Server;
 using NMaier.SimpleDlna.Server.Metadata;
 using NMaier.SimpleDlna.Utilities;
 
-namespace testDLNA
+namespace Makina
 {
   using CoverCache = LeastRecentlyUsedDictionary<string, Cover>;
 
@@ -212,7 +212,7 @@ namespace testDLNA
       return CachedCover != null;
     }
 
-    internal static BaseFile GetFile(testFolder parentFolder, FileInfo file,
+    internal static BaseFile GetFile(MakinaFolder parentFolder, FileInfo file,
       DlnaMime type, DlnaMediaTypes mediaType)
     {
       switch (mediaType)

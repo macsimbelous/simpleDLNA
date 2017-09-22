@@ -6,7 +6,7 @@ using NMaier.SimpleDlna.Server.Metadata;
 using NMaier.SimpleDlna.Thumbnails;
 using NMaier.SimpleDlna.Utilities;
 
-namespace testDLNA
+namespace Makina
 {
   [Serializable]
   internal sealed class Cover

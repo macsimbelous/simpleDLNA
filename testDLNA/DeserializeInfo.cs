@@ -1,7 +1,7 @@
 using System.IO;
 using NMaier.SimpleDlna.Server;
 
-namespace testDLNA
+namespace Makina
 {
   internal sealed class DeserializeInfo
   {

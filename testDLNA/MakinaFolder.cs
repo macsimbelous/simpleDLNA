@@ -6,21 +6,21 @@ using System.Threading.Tasks;
 using NMaier.SimpleDlna.Server;
 using NMaier.SimpleDlna.Server.Metadata;
 
-namespace testDLNA
+namespace Makina
 {
-  class testFolder : VirtualFolder
+  class MakinaFolder : VirtualFolder
   {
     public FileServer Server { get; set; }
-    public testFolder()
+    public MakinaFolder()
     {
     }
 
-    public testFolder(IMediaFolder parent, string name)
+    public MakinaFolder(IMediaFolder parent, string name)
       : this(parent, name, name)
     {
     }
 
-    public testFolder(IMediaFolder parent, string name, string id)
+    public MakinaFolder(IMediaFolder parent, string name, string id)
       : base(parent, name, id)
     {
     }

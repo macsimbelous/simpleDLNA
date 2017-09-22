@@ -5,7 +5,7 @@ using NMaier.SimpleDlna.Server;
 using TagLib;
 using File = TagLib.File;
 
-namespace testDLNA
+namespace Makina
 {
   [Serializable]
   internal sealed class ImageFile :

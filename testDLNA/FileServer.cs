@@ -7,7 +7,7 @@ using NMaier.SimpleDlna.Server;
 using System.Data.SQLite;
 using System.IO;
 
-namespace testDLNA
+namespace Makina
 {
   class FileServer : IMediaServer
   {
@@ -15,6 +15,8 @@ namespace testDLNA
     private readonly DlnaMediaTypes types;
     private object parent;
     private string Tag;
+    public SQLiteConnection PreviewsDB;
+    public string ErzaConnectionString;
     public IHttpAuthorizationMethod Authorizer { get; set; }
 
     public string FriendlyName { get; set; }
@@ -43,11 +45,11 @@ namespace testDLNA
     }
     private void DoRoot()
     {
-      testFolder newMaster = new testFolder(null, FriendlyName);
+      MakinaFolder newMaster = new MakinaFolder(null, FriendlyName);
       newMaster.Server = this;
       newMaster.Id = Identifiers.GENERAL_ROOT;
       
-      testFolder subdir = new testFolder(newMaster, FriendlyName);
+      MakinaFolder subdir = new MakinaFolder(newMaster, FriendlyName);
       subdir.Server = this;
       newMaster.AddSubFolder(subdir);
       FileInfo[] files = GetFilesByTag(this.Tag);
@@ -90,7 +92,7 @@ namespace testDLNA
           );
       }
     }
-    internal BaseFile GetFile(testFolder aParent, System.IO.FileInfo info)
+    internal BaseFile GetFile(MakinaFolder aParent, System.IO.FileInfo info)
     {
       BaseFile item;
       lock (ids)
@@ -124,7 +126,7 @@ namespace testDLNA
     }
     private FileInfo[] GetFilesByTag(string Tag)
     {
-      using (SQLiteConnection connection = new SQLiteConnection("data source=C:\\utils\\Erza\\erza.sqlite"))
+      using (SQLiteConnection connection = new SQLiteConnection(ErzaConnectionString))
       {
         connection.Open();
         List<FileInfo> imgs = new List<FileInfo>();
@@ -152,22 +154,18 @@ namespace testDLNA
     }
     private Stream GetPreview(string hash)
     {
-      using (SQLiteConnection connect = new SQLiteConnection("data source=" + "C:\\utils\\erza\\Previews.sqlite"))
+      using (SQLiteCommand command = new SQLiteCommand(PreviewsDB))
       {
-        connect.Open();
-        using (SQLiteCommand command = new SQLiteCommand(connect))
+        command.CommandText = "SELECT preview FROM previews WHERE hash = @hash;";
+        command.Parameters.AddWithValue("hash", hash);
+        byte[] tmp = (byte[])command.ExecuteScalar();
+        if (tmp != null)
         {
-          command.CommandText = "SELECT preview FROM previews WHERE hash = @hash;";
-          command.Parameters.AddWithValue("hash", hash);
-          byte[] tmp = (byte[])command.ExecuteScalar();
-          if (tmp != null)
-          {
-              return new MemoryStream(tmp);
-          }
-          else
-          {
-            return null;
-          }
+          return new MemoryStream(tmp);
+        }
+        else
+        {
+          return null;
         }
       }
     }

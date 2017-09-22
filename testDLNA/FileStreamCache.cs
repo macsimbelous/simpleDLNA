@@ -5,7 +5,7 @@ using System.Timers;
 using log4net;
 using NMaier.SimpleDlna.Utilities;
 
-namespace testDLNA
+namespace Makina
 {
   internal class FileStreamCache
   {
