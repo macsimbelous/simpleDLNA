@@ -33,7 +33,7 @@ namespace Makina
       }
       Console.CancelKeyPress += CancelKeyPressed;
       SetupLogging();
-      Console.Title = "SimpleDLNA - starting ...";
+      Console.Title = "Makina - starting ...";
       var server = new HttpServer(9000);
       var authorizer = new HttpAuthorizer(server);
       server.InfoFormat("Mounting FileServer for {0}", args[0]);
@@ -70,7 +70,7 @@ namespace Makina
       }
       var fs = new FileServer(types, ids, Tag);
 
-      fs.FriendlyName = "sdlna " + Tag;
+      fs.FriendlyName = Tag;
       Program.previews_db = new SQLiteConnection("data source=" + "C:\\utils\\erza\\Previews.sqlite");
       Program.previews_db.Open();
       fs.PreviewsDB = Program.previews_db;
@@ -91,7 +91,7 @@ namespace Makina
       e.Cancel = true;
       blockEvent.Set();
       LogManager.GetLogger(typeof(Program)).Info("Shutdown requested");
-      Console.Title = "SimpleDLNA - shutting down ...";
+      Console.Title = "Makina - shutting down ...";
       Program.previews_db.Close();
     }
     public static void SetupLogging()
