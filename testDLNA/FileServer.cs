@@ -107,8 +107,20 @@ namespace Makina
       }
 
       string ext = System.IO.Path.GetExtension(info.FullName).Replace(".", String.Empty).ToUpper();
-      var type = DlnaMaps.Ext2Dlna[ext];
-      var mediaType = DlnaMaps.Ext2Media[ext];
+      DlnaMime type;
+      DlnaMediaTypes mediaType;
+      if (ext == "BMP")
+      {
+        type = DlnaMaps.Ext2Dlna["JPG"];
+        mediaType = DlnaMaps.Ext2Media["JPG"];
+      }
+      else
+      {
+        type = DlnaMaps.Ext2Dlna[ext];
+        mediaType = DlnaMaps.Ext2Media[ext];
+      }
+      
+      //var mediaType = DlnaMaps.Ext2Media[ext];
       var rv = BaseFile.GetFile(aParent, info, type, mediaType);
       //pendingFiles.Enqueue(new WeakReference(rv));
       return rv;
