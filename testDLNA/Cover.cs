@@ -16,6 +16,7 @@ namespace Makina
       new ThumbnailMaker();
 
     private readonly FileInfo file;
+    private FileInfo noimage = new FileInfo(@"C:\utils\erza\makina\noimage.png");
     private byte[] bytes;
 
     private int height = 216;
@@ -172,11 +173,15 @@ namespace Makina
       {
         if (bytes == null)
         {
-          var thumb = thumber.GetThumbnail(
-            file,
-            width,
-            height
-            );
+          IThumbnail thumb;
+          if (file == null)
+          {
+            thumb = thumber.GetThumbnail(noimage, width, height);
+          }
+          else
+          {
+            thumb = thumber.GetThumbnail(file, width, height);
+          }
           bytes = thumb.GetData();
           height = thumb.Height;
           width = thumb.Width;

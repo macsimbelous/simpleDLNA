@@ -142,7 +142,7 @@ namespace Makina
       {
         connection.Open();
         List<FileInfo> imgs = new List<FileInfo>();
-        string sql = "select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag = @tag AND images.is_deleted = 0;";
+        string sql = "select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag = @tag AND images.is_deleted = 0 AND images.file_path IS NOT NULL;";
         using (SQLiteCommand command = new SQLiteCommand(sql, connection))
         {
           command.Parameters.AddWithValue("tag", Tag);
