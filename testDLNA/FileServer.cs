@@ -14,7 +14,7 @@ namespace Makina
     private readonly Identifiers ids;
     private readonly DlnaMediaTypes types;
     private object parent;
-    private string Tag;
+    private List<string> Tags;
     public SQLiteConnection PreviewsDB;
     public string ErzaConnectionString;
     public IHttpAuthorizationMethod Authorizer { get; set; }
@@ -31,12 +31,12 @@ namespace Makina
         return ids.GetItemById(id);
       }
     }
-    public FileServer(DlnaMediaTypes types, Identifiers ids, string Tag)
+    public FileServer(DlnaMediaTypes types, Identifiers ids, List<string> Tags)
     {
       this.types = types;
       this.ids = ids;
-      FriendlyName = Tag;
-      this.Tag = Tag;
+      FriendlyName = Tags[0];
+      this.Tags = Tags;
       //UUID = DeriveUUID();
     }
     public void Load()
@@ -52,7 +52,16 @@ namespace Makina
       MakinaFolder subdir = new MakinaFolder(newMaster, FriendlyName);
       subdir.Server = this;
       newMaster.AddSubFolder(subdir);
-      FileInfo[] files = GetFilesByTag(this.Tag);
+      FileInfo[] files;
+      if (this.Tags.Count > 1)
+      {
+        files = GetFilesByTags(this.Tags, false);
+      }
+      else
+      {
+        files = GetFilesByTag(this.Tags[0]);
+      }
+      
       foreach (FileInfo file in files)
       {
         var t = GetFile(subdir, file);
@@ -163,6 +172,77 @@ namespace Makina
           return imgs.ToArray();
         }
       }
+    }
+    private FileInfo[] GetFilesByTags(List<string> Tags, bool Or)
+    {
+      List<FileInfo> imgs = new List<FileInfo>();
+      using (SQLiteConnection Connection = new SQLiteConnection(ErzaConnectionString))
+      {
+        Connection.Open();
+        if (Or)
+        {
+          StringBuilder sql = new StringBuilder();
+          sql.Append("select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag in (");
+          for (int i = 0; i < Tags.Count; i++)
+          {
+            if (i > 0) sql.Append(", ");
+            sql.Append("'" + Tags[i] + "'");
+          }
+          sql.Append(") AND images.is_deleted = 0 group by images.image_id;");
+          //string sql = "select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path, Count(images.image_id) as CountName from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag in ('bdsm', 'oral') group by images.image_id Having CountName=2;";
+          using (SQLiteCommand command = new SQLiteCommand(sql.ToString(), Connection))
+          {
+            //command.Parameters.AddWithValue("tag", Tag);
+            SQLiteDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+              object o = reader["file_path"];
+              if (o != DBNull.Value)
+              {
+                FileInfo fi = new FileInfo((string)o);
+                if (fi.Exists)
+                {
+                  imgs.Add(fi);
+                }
+              }
+            }
+            reader.Close();
+          }
+        }
+        else
+        {
+          StringBuilder sql = new StringBuilder();
+          sql.Append("select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path, Count(images.image_id) as CountName from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag in (");
+          for (int i = 0; i < Tags.Count; i++)
+          {
+            if (i > 0) sql.Append(", ");
+            sql.Append("'" + Tags[i] + "'");
+          }
+          sql.Append(") group by images.image_id Having CountName=");
+          sql.Append(Tags.Count);
+          sql.Append(';');
+          //string sql = "select images.image_id, images.hash, images.is_deleted, images.width, images.height, images.file_path, Count(images.image_id) as CountName from tags inner join image_tags on tags.tag_id = image_tags.tag_id inner join images on images.image_id = image_tags.image_id where tags.tag in ('bdsm', 'oral') group by images.image_id Having CountName=2;";
+          using (SQLiteCommand command = new SQLiteCommand(sql.ToString(), Connection))
+          {
+            //command.Parameters.AddWithValue("tag", Tag);
+            SQLiteDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+              object o = reader["file_path"];
+              if (o != DBNull.Value)
+              {
+                FileInfo fi = new FileInfo((string)o);
+                if (fi.Exists)
+                {
+                  imgs.Add(fi);
+                }
+              }
+            }
+            reader.Close();
+          }
+        }
+      }
+      return imgs.ToArray();
     }
     private Stream GetPreview(string hash)
     {

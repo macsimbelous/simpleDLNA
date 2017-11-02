@@ -37,7 +37,7 @@ namespace Makina
       var server = new HttpServer(9000);
       var authorizer = new HttpAuthorizer(server);
       server.InfoFormat("Mounting FileServer for {0}", args[0]);
-      var fs = SetupFileServer(DlnaMediaTypes.Image, args[0]);
+      var fs = SetupFileServer(DlnaMediaTypes.Image, args);
       server.RegisterMediaServer(fs);
       server.NoticeFormat("{0} mounted", args[0]);
       Console.Title = $"{args[0]} - running ...";
@@ -52,7 +52,7 @@ namespace Makina
       server.Info("Going down!");
       server.Info("Closed!");
     }
-    private static FileServer SetupFileServer(DlnaMediaTypes types, string Tag)
+    private static FileServer SetupFileServer(DlnaMediaTypes types, string[] Tags)
     {
       var ids = new Identifiers(
         ComparerRepository.Lookup("title"), true);
@@ -68,9 +68,10 @@ namespace Makina
           throw new Exception("Invalid view " + v);
         }
       }
-      var fs = new FileServer(types, ids, Tag);
+      
+      var fs = new FileServer(types, ids, Tags.ToList());
 
-      fs.FriendlyName = Tag;
+      fs.FriendlyName = Tags[0];
       Program.previews_db = new SQLiteConnection("data source=" + "C:\\utils\\erza\\Previews.sqlite");
       Program.previews_db.Open();
       fs.PreviewsDB = Program.previews_db;
