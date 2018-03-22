@@ -72,10 +72,10 @@ namespace Makina
       var fs = new FileServer(types, ids, Tags.ToList());
 
       fs.FriendlyName = Tags[0];
-      Program.previews_db = new SQLiteConnection("data source=" + "C:\\utils\\erza\\Previews.sqlite");
+      Program.previews_db = new SQLiteConnection("data source=" + "C:\\utils\\data\\Previews.sqlite");
       Program.previews_db.Open();
       fs.PreviewsDB = Program.previews_db;
-      fs.ErzaConnectionString = "data source=C:\\utils\\Erza\\erza.sqlite";
+      fs.ErzaConnectionString = "data source=C:\\utils\\data\\erza.sqlite";
       fs.Load();
       return fs;
     }

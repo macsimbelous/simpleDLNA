@@ -16,7 +16,7 @@ namespace Makina
       new ThumbnailMaker();
 
     private readonly FileInfo file;
-    private FileInfo noimage = new FileInfo(@"C:\utils\erza\makina\noimage.png");
+    private FileInfo noimage = new FileInfo(@"C:\utils\data\noimage.png");
     private byte[] bytes;
 
     private int height = 216;
